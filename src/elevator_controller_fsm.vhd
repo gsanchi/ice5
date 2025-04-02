@@ -11,8 +11,8 @@
 --| ---------------------------------------------------------------------------
 --|
 --| FILENAME      : MooreElevatorController.vhd
---| AUTHOR(S)     : Capt Phillip Warner, Capt Dan Johnson, Capt Brian Yarbrough, ***YourName***
---| CREATED       : 03/2018 Last Modified on 06/24/2020
+--| AUTHOR(S)     : Capt Phillip Warner, Capt Dan Johnson, Capt Brian Yarbrough, Gia Sanchirico
+--| CREATED       : 03/2018 Last Modified on 04/2/2025
 --| DESCRIPTION   : This file implements the ICE5 Basic elevator controller (Moore Machine)
 --|
 --|  The system is specified as follows:
@@ -87,7 +87,7 @@ architecture Behavioral of elevator_controller_fsm is
     -- "sm_floor" the same way you'd assign a signal as std_logic
 	type sm_floor is (s_floor1, s_floor2, s_floor3, s_floor4);
 	
-	-- Here you create variables that can take on the values defined above. Neat!	
+	-- Here you create variables that can take on the values defined agit cobove. Neat!	
 	signal f_Q, f_Q_next: sm_floor;
 
 begin
@@ -95,15 +95,45 @@ begin
 	-- CONCURRENT STATEMENTS ------------------------------------------------------------------------------
 	
 	-- Next State Logic
+    f_Q_next <= s_floor2 when (i_up_down = '1' and f_Q = s_floor1) else -- going up
+                s_floor3 when (i_up_down = '1' and f_Q = s_floor2) else
+                s_floor4 when (i_up_down = '1' and f_Q = s_floor3) else
+                
+                --Going Down
+                s_floor3 when (i_up_down = '0' and f_Q = s_floor4) else 
+                s_floor2 when (i_up_down = '0' and f_Q = s_floor3) else
+                s_floor1 when (i_up_down = '0' and f_Q = s_floor2) else
+                
+                s_floor1; -- default case
   
 	-- Output logic
+    with f_Q select
+        o_floor <= "0001" when s_floor1,
+                   "0010" when s_floor2,
+                   "0011" when s_floor3,
+                   "0100" when s_floor4,
+                   "0001" when others;  --default is floor 1
+    
+    
 
 	-------------------------------------------------------------------------------------------------------
 	
 	-- PROCESSES ------------------------------------------------------------------------------------------	
 	
 	-- State register ------------
-	
+	--Synchronous reset
+	register_proc : process (i_clk)
+    begin
+        if rising_edge(i_clk) then
+            if i_reset = '1' then
+                f_Q <= s_floor2;        -- reset state is OFF
+            elsif (i_stop = '0') then
+                f_Q <= f_Q_next;    -- next state becomes current state
+            else
+                f_Q <= f_Q;
+            end if;
+        end if;
+    end process register_proc;
 	
 	-------------------------------------------------------------------------------------------------------
 	
