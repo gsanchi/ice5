@@ -95,7 +95,8 @@ begin
 	-- CONCURRENT STATEMENTS ------------------------------------------------------------------------------
 	
 	-- Next State Logic
-    f_Q_next <= s_floor2 when (i_up_down = '1' and f_Q = s_floor1) else -- going up
+    f_Q_next <= f_Q when i_stop = '1' else
+                s_floor2 when (i_up_down = '1' and f_Q = s_floor1) else -- going up
                 s_floor3 when (i_up_down = '1' and f_Q = s_floor2) else
                 s_floor4 when (i_up_down = '1' and f_Q = s_floor3) else
                 
