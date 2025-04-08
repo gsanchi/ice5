@@ -95,15 +95,14 @@ begin
 	-- CONCURRENT STATEMENTS ------------------------------------------------------------------------------
 	
 	-- Next State Logic
-    f_Q_next <= f_Q when i_stop = '1' else
-                s_floor2 when (i_up_down = '1' and f_Q = s_floor1) else -- going up
+    f_Q_next <= s_floor2 when (i_up_down = '1' and f_Q = s_floor1) else -- going up
                 s_floor3 when (i_up_down = '1' and f_Q = s_floor2) else
-                s_floor4 when (i_up_down = '1' and f_Q = s_floor3) else
+                s_floor4 when ((i_up_down = '1' and f_Q = s_floor3) or (i_up_down = '1' and f_Q = s_floor4)) else
                 
                 --Going Down
                 s_floor3 when (i_up_down = '0' and f_Q = s_floor4) else 
                 s_floor2 when (i_up_down = '0' and f_Q = s_floor3) else
-                s_floor1 when (i_up_down = '0' and f_Q = s_floor2) else
+                s_floor1 when ((i_up_down = '0' and f_Q = s_floor2) or (i_up_down = '0' and f_Q = s_floor1)) else
                 
                 s_floor1; -- default case
   
@@ -128,10 +127,10 @@ begin
         if rising_edge(i_clk) then
             if i_reset = '1' then
                 f_Q <= s_floor2;        -- reset state is OFF
-            elsif (i_stop = '0') then
-                f_Q <= f_Q_next;    -- next state becomes current state
+            elsif (i_stop = '1') then
+                f_Q <= f_Q;    -- next state becomes current state
             else
-                f_Q <= f_Q;
+                f_Q <= f_Q_next;
             end if;
         end if;
     end process register_proc;
